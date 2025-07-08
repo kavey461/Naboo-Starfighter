@@ -13,6 +13,11 @@ function _init()
 	
 	blaspr=17
 	
+	torx=64
+	tory=-20
+	
+	torspr=38
+	
 	muzzle=0
 end
 
@@ -42,12 +47,29 @@ function _update()
 		muzzle=5
 	end
 	
+	if btnp(4) then
+		torx=shipx
+		tory=shipy-3
+		sfx(1)
+		muzzle=5
+	end
+	
 	--moving the ship
 	shipx=shipx+shipsx
 	shipy=shipy+shipsy
 	
 	--moving blaster bolts
 	blay=blay-8
+	
+	--moving torpedoes
+	tory=tory-4
+	
+	--animate torpedoes
+	torspr=torspr+1
+	
+	if torspr>44 then
+		torspr=38
+	end
 	
 	--animate muzzle flash
 	
@@ -67,6 +89,7 @@ function _draw()
 	cls(0)
 	spr(shipspr,shipx,shipy)
 	spr(blaspr,blax,blay)
+	spr(torspr,torx,tory)
 	
 	if muzzle>0 then
 		circfill(shipx+2,shipy-1,muzzle,7)
