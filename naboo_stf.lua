@@ -18,7 +18,20 @@ function _init()
 	
 	torspr=38
 	
+	tdspr=13
+	tdfspr=14
+	
+	lifespr=2
+	dthspr=11
+	
 	muzzle=0
+	
+	score=0
+	
+	lives=3
+	
+	torps=3
+
 end
 
 function _update()
@@ -47,11 +60,12 @@ function _update()
 		muzzle=5
 	end
 	
-	if btnp(4) then
+	if btnp(4) and torps>=1 then
 		torx=shipx
 		tory=shipy-3
 		sfx(1)
 		muzzle=5
+		torps=torps-1
 	end
 	
 	--moving the ship
@@ -95,4 +109,27 @@ function _draw()
 		circfill(shipx+2,shipy-1,muzzle,7)
 		circfill(shipx+5,shipy-1,muzzle,7)
 	end
+	
+	print("score:"..score,40,1,12)
+	
+	--lives display
+	
+	for i=1,3 do
+		if lives>=i then
+			spr(lifespr,i*9-8,1)
+		else
+			spr(dthspr,i*9-8,1)
+		end		
+	end
+	
+	--torpedoes display
+	
+	for i=1,3 do
+		if torps>=i then
+			spr(tdspr,(i*9)+93,1)
+		else
+			spr(tdfspr,(i*9)+93,1)
+		end
+	end
+	
 end
