@@ -1,3 +1,5 @@
+--tab 0
+
 function _init()
 	cls(0)
 	shipx=64
@@ -26,11 +28,22 @@ function _init()
 	
 	muzzle=0
 	
-	score=0
+	score=10000
 	
 	lives=3
 	
 	torps=3
+	
+	starx={}
+	stary={}
+	starspd={}
+	
+	for i=1,100 do
+		add(starx,flr(rnd(128)))
+		add(stary,flr(rnd(128)))
+		add(starspd,rnd(1.5)+0.5)
+	end
+		
 
 end
 
@@ -39,7 +52,7 @@ function _update()
 	shipsx=0
 	shipsy=0
 	shipspr=2
-	
+
 	--controls
 	if btn(0) then
 		shipsx=-2
@@ -96,14 +109,20 @@ function _update()
 	elseif shipx<0 then
 		shipx=120
 	end
+	
+	--animate stars
+	animatestars()
 		
 end
 
+
 function _draw()
 	cls(0)
+	starfield()
 	spr(shipspr,shipx,shipy)
 	spr(blaspr,blax,blay)
 	spr(torspr,torx,tory)
+
 	
 	if muzzle>0 then
 		circfill(shipx+2,shipy-1,muzzle,7)
@@ -132,4 +151,32 @@ function _draw()
 		end
 	end
 	
+end
+
+--tab 1
+
+function starfield()
+	for i=1,#starx do
+		local scol=6
+		
+		if starspd[i]<1 then
+			scol=1
+		elseif starspd[i]<1.5 then
+			scol=13
+		end
+		
+		pset(starx[i],stary[i],scol)
+	end
+end	
+
+function animatestars()
+	for i=1,#stary do
+		local sy=stary[i]
+		sy=sy+starspd[i]
+		
+		if sy>128 then
+			sy=sy-128
+		end
+		stary[i]=sy
+	end
 end
