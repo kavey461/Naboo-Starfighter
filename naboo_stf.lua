@@ -1,14 +1,52 @@
 --tab 0
 
 function _init()
+
 	cls(0)
+	
+	mode="start"
+	blinkt=1
+
+end
+
+function _update()
+	
+	blinkt+=1
+
+	if mode=="game" then
+		update_game()
+	elseif mode=="start" then
+		update_start()
+	elseif mode=="over" then
+		update_over()
+	end
+	
+end
+
+
+function _draw()
+
+	if mode=="game" then
+		draw_game()
+	elseif mode=="start" then
+		draw_start()
+	elseif mode=="over" then
+		draw_over()
+	end
+	
+end
+
+function start_game()
+
+	mode="game"
+	
 	shipx=64
 	shipy=64
 	
-	shipspr=2
-	
 	shipsx=0
 	shipsy=0
+	
+	shipspr=2
 	
 	blax=64
 	blay=-10
@@ -43,11 +81,58 @@ function _init()
 		add(stary,flr(rnd(128)))
 		add(starspd,rnd(1.5)+0.5)
 	end
-		
-
+	
 end
 
-function _update()
+--tab 1
+
+--helpers
+
+function starfield()
+
+	for i=1,#starx do
+		local scol=6
+		
+		if starspd[i]<1 then
+			scol=1
+		elseif starspd[i]<1.5 then
+			scol=13
+		end
+		
+		pset(starx[i],stary[i],scol)
+	end
+	
+end	
+
+function animatestars()
+
+	for i=1,#stary do
+		local sy=stary[i]
+		sy=sy+starspd[i]
+		
+		if sy>128 then
+			sy=sy-128
+		end
+		stary[i]=sy
+	end
+	
+end
+
+function blink()
+	local banim={5,5,6,6,7,7,6,6,5}
+	if blinkt>#banim then
+		blinkt=1
+	end
+	
+	return banim[blinkt]
+	
+end
+
+--tab 2
+
+--update
+
+function update_game()
 	
 	shipsx=0
 	shipsy=0
@@ -115,8 +200,24 @@ function _update()
 		
 end
 
+function update_start()
+	if btnp(4) or btnp(5) then
+		start_game()
+	end
+end
 
-function _draw()
+function update_over()
+	if btnp(4) or btnp(5) then
+		mode="start"
+	end
+end
+
+--tab 3
+
+--draw
+
+function draw_game()
+
 	cls(0)
 	starfield()
 	spr(shipspr,shipx,shipy)
@@ -153,30 +254,19 @@ function _draw()
 	
 end
 
---tab 1
+function draw_start()
 
-function starfield()
-	for i=1,#starx do
-		local scol=6
-		
-		if starspd[i]<1 then
-			scol=1
-		elseif starspd[i]<1.5 then
-			scol=13
-		end
-		
-		pset(starx[i],stary[i],scol)
-	end
-end	
+	cls(1)
+	print("naboo starfighter",30,40,12)
+	print("press any key to start",21,80,blink())
 
-function animatestars()
-	for i=1,#stary do
-		local sy=stary[i]
-		sy=sy+starspd[i]
-		
-		if sy>128 then
-			sy=sy-128
-		end
-		stary[i]=sy
-	end
+end
+
+function draw_over()
+
+	cls(8)
+	print("game over",48,40,12)
+	print("press any key to continue",19,80,7)
+	
+
 end
