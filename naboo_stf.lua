@@ -72,15 +72,17 @@ function start_game()
 	
 	torps=3
 	
-	starx={}
-	stary={}
-	starspd={}
+	stars={}
 	
 	for i=1,100 do
-		add(starx,flr(rnd(128)))
-		add(stary,flr(rnd(128)))
-		add(starspd,rnd(1.5)+0.5)
+		local newstar={}
+		newstar.x=flr(rnd(128))
+		newstar.y=flr(rnd(128))
+		newstar.spd=rnd(1.5)+0.5
+		add(stars,newstar)
 	end
+	
+	blabs={}
 	
 end
 
@@ -89,31 +91,31 @@ end
 --helpers
 
 function starfield()
-
-	for i=1,#starx do
+	
+	for i=1,#stars do
+		local mystar=stars[i]
 		local scol=6
 		
-		if starspd[i]<1 then
+		if mystar.spd<1 then
 			scol=1
-		elseif starspd[i]<1.5 then
+		elseif mystar.spd<1.5 then
 			scol=13
 		end
 		
-		pset(starx[i],stary[i],scol)
+		pset(mystar.x,mystar.y,scol)
 	end
 	
 end	
 
 function animatestars()
-
-	for i=1,#stary do
-		local sy=stary[i]
-		sy=sy+starspd[i]
-		
-		if sy>128 then
-			sy=sy-128
+	
+	for i=1,#stars do
+		local mystar=stars[i]
+		mystar.y=mystar.y+mystar.spd
+	
+		if mystar.y>128 then
+		mystar.y=mystar.y-128
 		end
-		stary[i]=sy
 	end
 	
 end
@@ -152,8 +154,11 @@ function update_game()
 	end
 	
 	if btnp(5) then
-		blax=shipx
-		blay=shipy-3
+		local newblab={}
+		newblab.x=shipx
+		newblab.y=shipy-3
+		add(blabs,newblab)
+		
 		sfx(0)
 		muzzle=5
 	end
@@ -171,7 +176,14 @@ function update_game()
 	shipy=shipy+shipsy
 	
 	--moving blaster bolts
-	blay=blay-8
+	for i=#blabs,1,-1 do
+		local myblab=blabs[i]
+		myblab.y=myblab.y-8
+		
+		if myblab.y<-8 then
+			del(blabs,myblab)
+		end
+	end
 	
 	--moving torpedoes
 	tory=tory-4
@@ -221,7 +233,12 @@ function draw_game()
 	cls(0)
 	starfield()
 	spr(shipspr,shipx,shipy)
-	spr(blaspr,blax,blay)
+
+	for i=1,#blabs do
+		local myblab=blabs[i]
+		spr(blaspr,myblab.x,myblab.y)
+	end
+
 	spr(torspr,torx,tory)
 
 	
