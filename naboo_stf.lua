@@ -96,8 +96,6 @@ end
 
 --helpers
 
---helpers
-
 function starfield()
 	
 	for i=1,#stars do
@@ -129,6 +127,7 @@ function animatestars()
 end
 
 function blink()
+
 	local banim={5,5,6,6,7,7,6,6,5}
 	if blinkt>#banim then
 		blinkt=1
@@ -142,9 +141,36 @@ function drwmyspr(myspr)
 	spr(myspr.spr,myspr.x,myspr.y)
 end
 
---tab 2
+function col(a,b)
 
---update
+	local a_left=a.x
+	local a_top=a.y
+	local a_right=a.x+7
+	local a_btm=a.y+7
+	
+	local b_left=b.x
+	local b_top=b.y
+	local b_right=b.x+7
+	local b_btm=b.y+7
+	
+	if a_top>b_btm then
+		return false
+	end
+	if b_top>a_btm then
+		return false
+	end
+	if a_left>b_right then
+		return false
+	end
+	if b_left>b_right then
+		return false
+	end
+	
+	return true
+	
+end
+
+--tab 2
 
 --update
 
@@ -190,6 +216,19 @@ function update_game()
 	ship.x+=ship.sx
 	ship.y+=ship.sy
 	
+		--checking if ship hits edge
+	if ship.x>120 then
+		ship.x=0
+	elseif ship.x<0 then
+		ship.x=120
+	end
+	if ship.y<0 then
+		ship.y=0
+	end
+	if ship.y>120 then
+		ship.y=120
+	end
+	
 	--moving blaster bolts
 	for i=#blabs,1,-1 do
 		local myblab=blabs[i]
@@ -224,16 +263,25 @@ function update_game()
 		torspr=38
 	end
 	
+	--collision ship x enemies
+	for myen in all(enemies) do
+		if col(myen,ship) then
+			lives-=1
+			sfx(2)
+			del(enemies,myen)
+		end
+	end
+	
+	if lives<=0 then
+		mode="over"
+		return
+	end
+	
+	
 	--animate muzzle flash
 	
 	if muzzle>0 then
 		muzzle=muzzle-1
-	end
-	
-	if ship.x>120 then
-		ship.x=0
-	elseif ship.x<0 then
-		ship.x=120
 	end
 	
 	--animate stars
@@ -254,8 +302,6 @@ function update_over()
 end
 
 --tab 3
-
---draw
 
 --draw
 
