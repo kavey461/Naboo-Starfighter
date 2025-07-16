@@ -40,18 +40,16 @@ function start_game()
 
 	mode="game"
 	
-	shipx=64
-	shipy=64
+	ship={}
 	
-	shipsx=0
-	shipsy=0
-	
-	shipspr=2
+	ship.x=64
+	ship.y=64
+	ship.sx=0
+	ship.sy=0
+	ship.spr=2
 	
 	blax=64
 	blay=-10
-	
-	blaspr=17
 	
 	torx=64
 	tory=-20
@@ -84,9 +82,19 @@ function start_game()
 	
 	blabs={}
 	
+	enemies={}
+	
+	local myen={}
+	myen.x=60
+	myen.y=5
+	myen.spr=5
+	
+	add(enemies,myen)
 end
 
 --tab 1
+
+--helpers
 
 --helpers
 
@@ -130,33 +138,40 @@ function blink()
 	
 end
 
+function drwmyspr(myspr)
+	spr(myspr.spr,myspr.x,myspr.y)
+end
+
 --tab 2
+
+--update
 
 --update
 
 function update_game()
 	
-	shipsx=0
-	shipsy=0
-	shipspr=2
+	ship.sx=0
+	ship.sy=0
+	ship.spr=2
 
 	--controls
 	if btn(0) then
-		shipsx=-2
-		shipspr=1
+		ship.sx=-2
+		ship.spr=1
 	elseif btn(1) then
-		shipsx=2
-		shipspr=3
+		ship.sx=2
+		ship.spr=3
 	elseif btn(2) then
-		shipsy=-2
+		ship.sy=-2
 	elseif btn(3) then
-		shipsy=2
+		ship.sy=2
 	end
 	
 	if btnp(5) then
 		local newblab={}
-		newblab.x=shipx
-		newblab.y=shipy-3
+		newblab.x=ship.x
+		newblab.y=ship.y-3
+		newblab.spr=17
 		add(blabs,newblab)
 		
 		sfx(0)
@@ -164,16 +179,16 @@ function update_game()
 	end
 	
 	if btnp(4) and torps>=1 then
-		torx=shipx
-		tory=shipy-3
+		torx=ship.x
+		tory=ship.y-3
 		sfx(1)
 		muzzle=5
 		torps=torps-1
 	end
 	
 	--moving the ship
-	shipx=shipx+shipsx
-	shipy=shipy+shipsy
+	ship.x+=ship.sx
+	ship.y+=ship.sy
 	
 	--moving blaster bolts
 	for i=#blabs,1,-1 do
@@ -182,6 +197,20 @@ function update_game()
 		
 		if myblab.y<-8 then
 			del(blabs,myblab)
+		end
+	end
+	
+	--moving enemies
+	for myen in all(enemies) do
+		myen.y+=1
+		
+		myen.spr+=0.2
+		if myen.spr>=9 then
+			myen.spr=5
+		end
+		
+		if myen.y>128 then
+			del(enemies.myen)
 		end
 	end
 	
@@ -201,10 +230,10 @@ function update_game()
 		muzzle=muzzle-1
 	end
 	
-	if shipx>120 then
-		shipx=0
-	elseif shipx<0 then
-		shipx=120
+	if ship.x>120 then
+		ship.x=0
+	elseif ship.x<0 then
+		ship.x=120
 	end
 	
 	--animate stars
@@ -228,23 +257,30 @@ end
 
 --draw
 
+--draw
+
 function draw_game()
 
 	cls(0)
 	starfield()
-	spr(shipspr,shipx,shipy)
+	drwmyspr(ship)
 
-	for i=1,#blabs do
-		local myblab=blabs[i]
-		spr(blaspr,myblab.x,myblab.y)
+	--drawing enemies
+	for myen in all(enemies) do
+		drwmyspr(myen)
+	end
+
+	--drawing blaster bolts
+	for myblab in all(blabs) do
+		drwmyspr(myblab)
 	end
 
 	spr(torspr,torx,tory)
 
 	
 	if muzzle>0 then
-		circfill(shipx+2,shipy-1,muzzle,7)
-		circfill(shipx+5,shipy-1,muzzle,7)
+		circfill(ship.x+2,ship.y-1,muzzle,7)
+		circfill(ship.x+5,ship.y-1,muzzle,7)
 	end
 	
 	print("score:"..score,40,1,12)
