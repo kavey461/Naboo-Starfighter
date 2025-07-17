@@ -48,19 +48,11 @@ function start_game()
 	ship.sy=0
 	ship.spr=2
 	
-	blax=64
-	blay=-10
-	
-	torx=64
-	tory=-20
-	
-	torspr=38
+	lifespr=2
+	dthspr=11
 	
 	tdspr=13
 	tdfspr=14
-	
-	lifespr=2
-	dthspr=11
 	
 	muzzle=0
 	
@@ -68,7 +60,7 @@ function start_game()
 	
 	lives=3
 	
-	torps=3
+	tornum=3
 	
 	stars={}
 	
@@ -81,6 +73,8 @@ function start_game()
 	end
 	
 	blabs={}
+	
+	tors={}
 	
 	enemies={}
 	
@@ -170,6 +164,17 @@ function col(a,b)
 	
 end
 
+function spawnen()
+
+	local myen={}
+	myen.x=rnd(120)
+	myen.y=-8
+	myen.spr=5
+	
+	add(enemies,myen)
+	
+end
+
 --tab 2
 
 --update
@@ -204,19 +209,25 @@ function update_game()
 		muzzle=5
 	end
 	
-	if btnp(4) and torps>=1 then
-		torx=ship.x
-		tory=ship.y-3
+	if btnp(4) and tornum>=1 then
+		local newtor={}
+		
+		newtor.x=ship.x
+		newtor.y=ship.y-3
+		newtor.spr=38
+		
+		add(tors,newtor)
+	
 		sfx(1)
 		muzzle=5
-		torps=torps-1
+		tornum-=1
 	end
 	
 	--moving the ship
 	ship.x+=ship.sx
 	ship.y+=ship.sy
 	
-		--checking if ship hits edge
+	--checking if ship hits edge
 	if ship.x>120 then
 		ship.x=0
 	elseif ship.x<0 then
@@ -239,6 +250,22 @@ function update_game()
 		end
 	end
 	
+	--moving + animating torpedoes
+	for i=#tors,1,-1 do
+		local mytor=tors[i]
+		mytor.y=mytor.y-4
+		
+		mytor.spr+=1
+	
+		if mytor.spr>44 then
+			mytor.spr=38
+		end
+		
+		if mytor.y<-8 then
+			del(tors,mytor)
+		end
+	end
+	
 	--moving enemies
 	for myen in all(enemies) do
 		myen.y+=1
@@ -253,14 +280,29 @@ function update_game()
 		end
 	end
 	
-	--moving torpedoes
-	tory=tory-4
 	
-	--animate torpedoes
-	torspr=torspr+1
+	--collision blabs x enemies
+	for myen in all(enemies) do
+		for myblab in all(blabs) do
+			if col(myen,myblab) then
+				del(enemies,myen)
+				del(blabs,myblab)
+				sfx(3)
+				spawnen()
+			end
+		end
+	end
 	
-	if torspr>44 then
-		torspr=38
+	--collision tors x enemies
+	for myen in all(enemies) do
+		for mytor in all(tors) do
+			if col(myen,mytor) then
+				del(enemies,myen)
+				del(tors,mytor)
+				sfx(3)
+				spawnen()
+			end
+		end
 	end
 	
 	--collision ship x enemies
@@ -276,7 +318,6 @@ function update_game()
 		mode="over"
 		return
 	end
-	
 	
 	--animate muzzle flash
 	
@@ -320,9 +361,11 @@ function draw_game()
 	for myblab in all(blabs) do
 		drwmyspr(myblab)
 	end
-
-	spr(torspr,torx,tory)
-
+	
+	--drawing torpedoes
+	for mytor in all(tors) do
+		drwmyspr(mytor)
+	end
 	
 	if muzzle>0 then
 		circfill(ship.x+2,ship.y-1,muzzle,7)
@@ -344,7 +387,7 @@ function draw_game()
 	--torpedoes display
 	
 	for i=1,3 do
-		if torps>=i then
+		if tornum>=i then
 			spr(tdspr,(i*9)+93,1)
 		else
 			spr(tdfspr,(i*9)+93,1)
