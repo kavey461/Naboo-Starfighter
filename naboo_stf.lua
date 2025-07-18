@@ -6,11 +6,12 @@ function _init()
 	
 	mode="start"
 	blinkt=1
-
+	
+	t=0
 end
 
 function _update()
-	
+	t+=1
 	blinkt+=1
 
 	if mode=="game" then
@@ -39,6 +40,7 @@ end
 function start_game()
 
 	mode="game"
+	t=0
 	
 	ship={}
 	
@@ -54,11 +56,14 @@ function start_game()
 	tdspr=13
 	tdfspr=14
 	
+	blatimer=0
+	
 	muzzle=0
 	
-	score=10000
+	score=0
 	
 	lives=3
+	invul=0
 	
 	tornum=3
 	
@@ -198,16 +203,20 @@ function update_game()
 		ship.sy=2
 	end
 	
-	if btnp(5) then
-		local newblab={}
-		newblab.x=ship.x
-		newblab.y=ship.y-3
-		newblab.spr=17
-		add(blabs,newblab)
-		
-		sfx(0)
-		muzzle=5
+	if btn(5) then
+		if blatimer<=0 then
+			local newblab={}
+			newblab.x=ship.x
+			newblab.y=ship.y-3
+			newblab.spr=17
+			add(blabs,newblab)
+			
+			sfx(0)
+			muzzle=5
+			blatimer=4
+		end
 	end
+	blatimer-=1
 	
 	if btnp(4) and tornum>=1 then
 		local newtor={}
@@ -276,7 +285,8 @@ function update_game()
 		end
 		
 		if myen.y>128 then
-			del(enemies.myen)
+			del(enemies,myen)
+			spawnen()
 		end
 	end
 	
@@ -288,6 +298,7 @@ function update_game()
 				del(enemies,myen)
 				del(blabs,myblab)
 				sfx(3)
+				score+=1
 				spawnen()
 			end
 		end
@@ -306,12 +317,16 @@ function update_game()
 	end
 	
 	--collision ship x enemies
-	for myen in all(enemies) do
-		if col(myen,ship) then
-			lives-=1
-			sfx(2)
-			del(enemies,myen)
+	if invul<=0 then
+		for myen in all(enemies) do
+			if col(myen,ship) then
+				lives-=1
+				sfx(2)
+				invul=60
+			end
 		end
+	else
+		invul-=1
 	end
 	
 	if lives<=0 then
@@ -350,8 +365,15 @@ function draw_game()
 
 	cls(0)
 	starfield()
-	drwmyspr(ship)
-
+	if invul<=0 then
+		drwmyspr(ship)
+	else
+		--invul state
+		if sin(t/5)<0.1 then
+			drwmyspr(ship)
+		end
+	end
+	
 	--drawing enemies
 	for myen in all(enemies) do
 		drwmyspr(myen)
@@ -372,7 +394,7 @@ function draw_game()
 		circfill(ship.x+5,ship.y-1,muzzle,7)
 	end
 	
-	print("score:"..score,40,1,12)
+	print("score:"..score,50,1,12)
 	
 	--lives display
 	
@@ -410,5 +432,4 @@ function draw_over()
 	print("game over",48,40,12)
 	print("press any key to continue",19,80,7)
 	
-
 end
