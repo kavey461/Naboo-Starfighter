@@ -83,12 +83,9 @@ function start_game()
 	
 	enemies={}
 	
-	local myen={}
-	myen.x=60
-	myen.y=5
-	myen.spr=5
+	explos={}
 	
-	add(enemies,myen)
+	spawnen()
 end
 
 --tab 1
@@ -175,9 +172,19 @@ function spawnen()
 	myen.x=rnd(120)
 	myen.y=-8
 	myen.spr=5
+	myen.hp=5
+	myen.flash=0
 	
 	add(enemies,myen)
 	
+end
+
+function explode(expx,expy)
+	local myex={}
+	myex.x=expx
+	myex.y=expy
+	myex.age=0
+	add(explos,myex)
 end
 
 --tab 2
@@ -295,11 +302,19 @@ function update_game()
 	for myen in all(enemies) do
 		for myblab in all(blabs) do
 			if col(myen,myblab) then
-				del(enemies,myen)
 				del(blabs,myblab)
-				sfx(3)
-				score+=1
-				spawnen()
+				myen.hp-=1
+				sfx(4)
+				myen.flash=2
+				
+				if myen.hp<=0 then
+					del(enemies,myen)
+					sfx(3)
+					score+=1
+					spawnen()
+					explode(myen.x,myen.y)
+				end
+				
 			end
 		end
 	end
@@ -308,10 +323,19 @@ function update_game()
 	for myen in all(enemies) do
 		for mytor in all(tors) do
 			if col(myen,mytor) then
-				del(enemies,myen)
 				del(tors,mytor)
-				sfx(3)
-				spawnen()
+				myen.hp-=5
+				sfx(4)
+				myen.flash=30
+				
+				if myen.hp<=0 then
+					del(enemies,myen)
+					sfx(3)
+					score+=1
+					spawnen()
+					explode(myen.x,myen.y)
+				end
+				
 			end
 		end
 	end
@@ -376,12 +400,36 @@ function draw_game()
 	
 	--drawing enemies
 	for myen in all(enemies) do
+		if myen.flash>0 then
+			myen.flash-=1
+			
+			for i=1,15 do
+				pal(i,7)
+			end
+			
+		end
 		drwmyspr(myen)
+		pal()
 	end
 
 	--drawing blaster bolts
 	for myblab in all(blabs) do
 		drwmyspr(myblab)
+	end
+	
+	--drawing explosion
+	local exframes={64,64,66,68,70,70,72,72}
+	for myex in all(explos) do
+	
+	local myspr=myex.age
+	myspr=flr(myspr)
+	myspr=exframes[myspr]
+	
+		spr(myspr,myex.x-4,myex.y-4,2,2)
+		myex.age+=1
+		if myex.age>5 then
+			del(explos,myex)
+		end
 	end
 	
 	--drawing torpedoes
@@ -432,4 +480,5 @@ function draw_over()
 	print("game over",48,40,12)
 	print("press any key to continue",19,80,7)
 	
+
 end
