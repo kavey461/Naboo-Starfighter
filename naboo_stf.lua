@@ -85,6 +85,8 @@ function start_game()
 	
 	explos={}
 	
+	parts={}
+	
 	spawnen()
 end
 
@@ -180,11 +182,40 @@ function spawnen()
 end
 
 function explode(expx,expy)
-	local myex={}
-	myex.x=expx
-	myex.y=expy
-	myex.age=0
-	add(explos,myex)
+	--local myex={}
+	--myex.x=expx
+	--myex.y=expy
+	--myex.age=0
+	--add(explos,myex)
+	
+	local myp={}
+	myp.x=expx
+	myp.y=expy
+	
+	myp.sx=0
+	myp.sy=0
+	
+	myp.age=0
+	myp.size=8
+	myp.maxage=0
+	
+	add(parts,myp)
+	
+	for i=1,30 do
+		local myp={}
+		myp.x=expx
+		myp.y=expy
+		
+		myp.sx=(rnd()-0.5)*6
+		myp.sy=(rnd()-0.5)*6
+		
+		myp.age=rnd(5)
+		myp.size=1+rnd(4)
+		myp.maxage=10+rnd(10)
+		
+		add(parts,myp)
+	end
+	
 end
 
 --tab 2
@@ -302,7 +333,13 @@ function update_game()
 	for myen in all(enemies) do
 		for myblab in all(blabs) do
 			if col(myen,myblab) then
-				del(blabs,myblab)
+				--draw + animate sparks
+				myblab.spr+=1
+				myblab.y+=10
+				if myblab.spr>=19 then
+					del(blabs,myblab)
+				end
+				
 				myen.hp-=1
 				sfx(4)
 				myen.flash=2
@@ -312,7 +349,7 @@ function update_game()
 					sfx(3)
 					score+=1
 					spawnen()
-					explode(myen.x,myen.y)
+					explode(myen.x+4,myen.y+4)
 				end
 				
 			end
@@ -333,7 +370,7 @@ function update_game()
 					sfx(3)
 					score+=1
 					spawnen()
-					explode(myen.x,myen.y)
+					explode(myen.x+4,myen.y+4)
 				end
 				
 			end
@@ -417,19 +454,58 @@ function draw_game()
 		drwmyspr(myblab)
 	end
 	
-	--drawing explosion
-	local exframes={64,64,66,68,70,70,72,72}
-	for myex in all(explos) do
+	--drawing explosions
+	--local exframes={64,64,66,68,70,70,72,72}
+	--for myex in all(explos) do
 	
-	local myspr=myex.age
-	myspr=flr(myspr)
-	myspr=exframes[myspr]
+		--local myspr=myex.age
+		--myspr=flr(myspr)
+		--myspr=exframes[myspr]
 	
-		spr(myspr,myex.x-4,myex.y-4,2,2)
-		myex.age+=1
-		if myex.age>5 then
-			del(explos,myex)
+		--spr(myspr,myex.x-4,myex.y-4,2,2)
+		--myex.age+=1
+		--if myex.age>5 then
+			--del(explos,myex)
+		--end
+	--end
+	
+	--drawing particles
+	for myp in all(parts) do
+		local pc=7
+		
+		if myp.age>5 then
+			pc=10
 		end
+		if myp.age>7 then
+			pc=9
+		end
+		if myp.age>10 then
+			pc=8
+		end
+		if myp.age>12 then
+			pc=2
+		end
+		if myp.age>15 then
+			pc=5
+		end
+	
+		circfill(myp.x,myp.y,myp.size,pc)
+		
+		myp.x+=myp.sx
+		myp.y+=myp.sy
+		
+		myp.sx*=0.85
+		myp.sy*=0.85
+		
+		myp.age+=1
+		
+		if myp.age>myp.maxage then
+			myp.size-=0.5
+			if myp.size<0 then
+				del(parts,myp)
+			end
+		end
+		
 	end
 	
 	--drawing torpedoes
