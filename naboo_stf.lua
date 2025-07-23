@@ -1,5 +1,3 @@
---tab 0
-
 function _init()
 
 	cls(0)
@@ -471,25 +469,44 @@ function draw_game()
 	
 	--drawing particles
 	for myp in all(parts) do
-		local pc=7
+		--local pc=7
+		
+		--if myp.age>5 then
+			--pc=10
+		--end
+		--if myp.age>7 then
+			--pc=9
+		--end
+		--if myp.age>10 then
+			--pc=8
+		--end
+		--if myp.age>12 then
+			--pc=2
+		--end
+		--if myp.age>15 then
+			--pc=5
+		--end
+		
+		local myspr=64
 		
 		if myp.age>5 then
-			pc=10
+			myspr+=2
 		end
 		if myp.age>7 then
-			pc=9
+			myspr+=2
 		end
 		if myp.age>10 then
-			pc=8
+			myspr+=2
 		end
 		if myp.age>12 then
-			pc=2
+			myspr+=2
 		end
 		if myp.age>15 then
-			pc=5
+			myspr+=2
 		end
 	
-		circfill(myp.x,myp.y,myp.size,pc)
+		--circfill(myp.x,myp.y,myp.size,pc)
+		spr(myspr, myp.x, myp.y, 2, 2)
 		
 		myp.x+=myp.sx
 		myp.y+=myp.sy
