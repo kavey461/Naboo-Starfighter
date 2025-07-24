@@ -179,12 +179,7 @@ function spawnen()
 	
 end
 
-function explode(expx,expy)
-	--local myex={}
-	--myex.x=expx
-	--myex.y=expy
-	--myex.age=0
-	--add(explos,myex)
+function explode(expx,expy,isblue)
 	
 	local myp={}
 	myp.x=expx
@@ -196,6 +191,7 @@ function explode(expx,expy)
 	myp.age=0
 	myp.size=8
 	myp.maxage=0
+	myp.blue=isblue
 	
 	add(parts,myp)
 	
@@ -204,17 +200,66 @@ function explode(expx,expy)
 		myp.x=expx
 		myp.y=expy
 		
-		myp.sx=(rnd()-0.5)*6
-		myp.sy=(rnd()-0.5)*6
+		myp.sx=(rnd()-0.5)*8
+		myp.sy=(rnd()-0.5)*8
 		
 		myp.age=rnd(5)
 		myp.size=1+rnd(4)
 		myp.maxage=10+rnd(10)
+		myp.blue=isblue
 		
 		add(parts,myp)
 	end
 	
 end
+
+function page_red(page)
+		
+		local myspr=64
+		
+		if page>5 then
+			myspr+=2
+		end
+		if page>7 then
+			myspr+=2
+		end
+		if page>10 then
+			myspr+=2
+		end
+		if page>12 then
+			myspr+=2
+		end
+		if page>15 then
+			myspr+=2
+		end
+	
+		return myspr
+		
+	end
+	
+	function page_blue(page)
+		
+		local myspr=96
+		
+		if page>5 then
+			myspr+=2
+		end
+		if page>7 then
+			myspr+=2
+		end
+		if page>10 then
+			myspr+=2
+		end
+		if page>12 then
+			myspr+=2
+		end
+		if page>15 then
+			myspr+=2
+		end
+	
+		return myspr
+		
+	end
 
 --tab 2
 
@@ -347,7 +392,7 @@ function update_game()
 					sfx(3)
 					score+=1
 					spawnen()
-					explode(myen.x+4,myen.y+4)
+					explode(myen.x-6,myen.y-6)
 				end
 				
 			end
@@ -368,7 +413,7 @@ function update_game()
 					sfx(3)
 					score+=1
 					spawnen()
-					explode(myen.x+4,myen.y+4)
+					explode(myen.x-6,myen.y-6)
 				end
 				
 			end
@@ -379,6 +424,7 @@ function update_game()
 	if invul<=0 then
 		for myen in all(enemies) do
 			if col(myen,ship) then
+				explode(ship.x-6,ship.y-6,true)
 				lives-=1
 				sfx(2)
 				invul=60
@@ -452,18 +498,12 @@ function draw_game()
 		drwmyspr(myblab)
 	end
 	
-	--drawing explosions
-	--local exframes={64,64,66,68,70,70,72,72}
-	--for myex in all(explos) do
-	
-		--local myspr=myex.age
-		--myspr=flr(myspr)
-		--myspr=exframes[myspr]
-	
-		--spr(myspr,myex.x-4,myex.y-4,2,2)
-		--myex.age+=1
-		--if myex.age>5 then
-			--del(explos,myex)
+	--drawing shwaves
+	--for mysw in all(shwaves) do
+		--circ(mysw.x,mysw.y,mysw.r,mysw.col)
+		--mysw.r+=mysw.speed
+		--if mysw.r>mysw.tr then
+			--del(shwaves,mysw)
 		--end
 	--end
 	
@@ -489,25 +529,16 @@ function draw_game()
 		
 		local myspr=64
 		
-		if myp.age>5 then
-			myspr+=2
+		if myp.blue then
+			myspr=page_blue(myp.age)
+		else
+			myspr=page_red(myp.age)
 		end
-		if myp.age>7 then
-			myspr+=2
-		end
-		if myp.age>10 then
-			myspr+=2
-		end
-		if myp.age>12 then
-			myspr+=2
-		end
-		if myp.age>15 then
-			myspr+=2
-		end
-	
+		
 		--circfill(myp.x,myp.y,myp.size,pc)
 		spr(myspr, myp.x, myp.y, 2, 2)
-		
+	
+			
 		myp.x+=myp.sx
 		myp.y+=myp.sy
 		
@@ -572,6 +603,5 @@ function draw_over()
 	cls(8)
 	print("game over",48,40,12)
 	print("press any key to continue",19,80,7)
-	
 
 end
