@@ -2,10 +2,12 @@ function _init()
 
 	cls(0)
 	
-	mode="start"
+	startscreen()
+	
 	blinkt=1
 	
 	t=0
+	
 end
 
 function _update()
@@ -16,8 +18,12 @@ function _update()
 		update_game()
 	elseif mode=="start" then
 		update_start()
+	elseif mode=="wavetext" then
+		update_wavetext()
 	elseif mode=="over" then
 		update_over()
+	elseif mode=="win" then
+		update_win()
 	end
 	
 end
@@ -29,18 +35,30 @@ function _draw()
 		draw_game()
 	elseif mode=="start" then
 		draw_start()
+	elseif mode=="wavetext" then
+		draw_wavetext()
 	elseif mode=="over" then
 		draw_over()
+	elseif mode=="win" then
+		draw_win()
 	end
 	
 end
 
-function start_game()
+function startscreen()
+	mode="start"
+	music(0)
+end
 
-	mode="game"
+function start_game()
+	music(-1,1000)
 	t=0
 	
+	wave=0
+	nextwave()
+	
 	ship={}
+
 	
 	ship.x=64
 	ship.y=64
@@ -85,7 +103,6 @@ function start_game()
 	
 	parts={}
 	
-	spawnen()
 end
 
 --tab 1
@@ -391,8 +408,12 @@ function update_game()
 					del(enemies,myen)
 					sfx(3)
 					score+=1
-					spawnen()
 					explode(myen.x-6,myen.y-6)
+					
+					if #enemies==0 then
+						nextwave()
+					end
+					
 				end
 				
 			end
@@ -412,8 +433,12 @@ function update_game()
 					del(enemies,myen)
 					sfx(3)
 					score+=1
-					spawnen()
 					explode(myen.x-6,myen.y-6)
+					
+					if #enemies==0 then
+						nextwave()
+					end
+					
 				end
 				
 			end
@@ -436,6 +461,7 @@ function update_game()
 	
 	if lives<=0 then
 		mode="over"
+		music(1)
 		return
 	end
 	
@@ -451,14 +477,51 @@ function update_game()
 end
 
 function update_start()
-	if btnp(4) or btnp(5) then
-		start_game()
+	if btn(4)==false and btn(5)==false then
+		btnreleased=true
+	end
+	
+		if btnreleased then
+		if btnp(4) or btnp(5) then
+			start_game()
+			btnreleased=false
+		end
 	end
 end
 
 function update_over()
-	if btnp(4) or btnp(5) then
-		mode="start"
+
+	if btn(4)==false and btn(5)==false then
+		btnreleased=true
+	end
+	
+		if btnreleased then
+		if btnp(4) or btnp(5) then
+			startscreen()
+			btnreleased=false
+		end
+	end
+end
+
+function update_win()
+	if btn(4)==false and btn(5)==false then
+		btnreleased=true
+	end
+	
+	if btnreleased then
+		if btnp(4) or btnp(5) then
+			startscreen()
+			btnreleased=false
+		end
+	end
+end
+
+function update_wavetext()
+	update_game()
+	wavetime-=1
+	if wavetime<0 then
+		mode="game"
+		spawnwave()
 	end
 end
 
@@ -566,7 +629,7 @@ function draw_game()
 		circfill(ship.x+5,ship.y-1,muzzle,7)
 	end
 	
-	print("score:"..score,50,1,12)
+	print("score:"..score,53,1,12)
 	
 	--lives display
 	
@@ -603,5 +666,37 @@ function draw_over()
 	cls(8)
 	print("game over",48,40,12)
 	print("press any key to continue",19,80,7)
+end
 
+function draw_win()
+
+	cls(11)
+	print("congratulations!",36,40,12)
+	print("press any key to continue",19,80,7)
+
+end	
+
+function draw_wavetext()
+	draw_game()
+	print("wave "..wave,56,40,blink())
+end
+
+--tab 4
+
+--waves and enemies
+
+function spawnwave()
+	spawnen()
+end
+
+function nextwave()
+	wave+=1
+	
+	if wave>4 then
+		mode="win"
+	else
+		mode="wavetext"
+		wavetime=60
+	end
+	
 end
